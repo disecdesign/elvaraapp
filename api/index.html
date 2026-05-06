@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elvara Store Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
+body{background:#f5f5f5;color:#111;padding:20px}
+.container{max-width:680px;margin:0 auto}
+h1{font-size:22px;font-weight:600;margin-bottom:4px}
+.sub{color:#666;font-size:14px;margin-bottom:24px}
+.card{background:white;border:1px solid #e5e5e5;border-radius:12px;padding:20px;margin-bottom:16px}
+label{font-size:13px;color:#555;display:block;margin-bottom:4px;margin-top:10px}
+input,select,textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#111;display:block}
+textarea{min-height:80px;resize:vertical}
+.btn{display:block;width:100%;padding:11px;background:#5c6ac4;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:500;margin-top:14px}
+.btn:hover{background:#4959bd}
+.btn-green{background:#96bf48}.btn-green:hover{background:#7aad2a}
+.btn-copy{width:auto;padding:6px 14px;font-size:12px;margin-top:8px;background:#f0f0f0;color:#333;border:1px solid #ddd;border-radius:6px;cursor:pointer}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{padding:7px 14px;background:white;color:#555;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer}
+.tab.on{background:#5c6ac4;color:white;border-color:#5c6ac4}
+.panel{display:none}.panel.on{display:block}
+.result{background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:14px;margin-top:12px;font-size:14px;line-height:1.7;white-space:pre-wrap;display:none}
+.result.on{display:block}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid #ddd;border-top-color:#5c6ac4;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#status{color:#e53e3e;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Elvara Store Manager</h1>
+  <p class="sub">AI-powered content for your Shopify store</p>
+
+  <div id="login" class="card">
+    <label>Store URL</label>
+    <input id="url" type="text" placeholder="elvara.myshopify.com">
+    <label>API Token (optional)</label>
+    <input id="token" type="password" placeholder="optional">
+    <button class="btn btn-green" id="connectBtn">Connect to Elvara</button>
+    <p id="status"></p>
+  </div>
+
+  <div id="app" style="display:none">
+    <div class="tabs">
+      <button class="tab on" data-tab="products">Products</button>
+      <button class="tab" data-tab="seo">SEO</button>
+      <button class="tab" data-tab="ads">Ad copy</button>
+      <button class="tab" data-tab="homepage">Homepage</button>
+      <button class="tab" data-tab="email">Email</button>
+      <button class="tab" data-tab="policy">Policies</button>
+      <button class="tab" data-tab="pricing">Pricing</button>
+    </div>
+
+    <div id="products" class="panel on">
+      <div class="card">
+        <label>Product name</label><input id="p-name" placeholder="e.g. Wireless Earbuds Pro">
+        <label>Features</label><input id="p-feat" placeholder="e.g. noise cancellation, 30hr battery">
+        <label>Tone</label>
+        <select id="p-tone"><option>Professional</option><option>Exciting & bold</option><option>Friendly</option><option>Luxury</option></select>
+        <label>Language</label>
+        <select id="p-lang"><option>English</option><option>French</option><option>Arabic</option><option>Spanish</option></select>
+        <button class="btn" data-action="product">Generate description</button>
+        <div class="result" id="r-product"></div>
+        <button class="btn-copy" data-copy="r-product" style="display:none">Copy</button>
+      </div>
+    </div>
+
+    <div id="seo" class="panel">
+      <div class="card">
+        <label>Product name</label><input id="seo-name" placeholder="e.g. Smart LED Desk Lamp">
+        <button class="btn" data-action="seo">Generate SEO</button>
+        <div class="result" id="r-seo"></div>
+        <button class="btn-copy" data-copy="r-seo" style="display:none">Copy</button>
+      </div>
+    </div>
+
+    <div id="ads" class="panel">
+      <div class="card">
+        <label>Product name</label><input id="ad-name" placeholder="e.g. Smart Watch">
+        <label>Platform</label>
+        <select id="ad-platform"><option>Facebook/Instagram</option><option>TikTok</option><option>Google</option><option>Snapchat</option></select>
+        <label>Offer (optional)</label><input id="ad-offer" placeholder="e.g. 30% off today">
+        <button class="btn" data-action="ads">Generate ads</button>
+        <div class="result" id="r-ads"></div>
+        <button class="btn-copy" data-copy="r-ads" style="display:none">Copy</button>
+      </div>
+    </div>
+
+    <div id="homepage" class="panel">
+      <div class="card">
+        <label>Store name</label><input id="hp-name" placeholder="e.g. Elvara">
+        <label>What makes you unique?</label><textarea id="hp-usp" placeholder="e.g. Best prices, fast shipping"></textarea>
+        <label>Promotion (optional)</label><input id="hp-promo" placeholder="e.g. Free shipping over $50">
+        <button class="btn" data-action="homepage">Generate homepage</button>
+        <div class="result" id="r-homepage"></div>
+        <button class="btn-copy" data-copy="r-homepage" style="display:none">Copy</button>
+      </div>
+    </div>
+
+    <div id="email" class="panel">
+      <div class="card">
+        <label>Email type</label>
+        <select id="em-type"><option>Welcome email</option><option>Abandoned cart</option><option>Flash sale</option><option>New arrivals</option></select>
+        <label>Store name</label><input id="em-store" placeholder="e.g. Elvara">
+        <label>Offer (optional)</label><input id="em-offer" placeholder="e.g. 20% off this weekend">
+        <button class="btn" data-action="email">Generate email</button>
+        <div class="result" id="r-email"></div>
+        <button class="btn-copy" data-copy="r-email" style="display:none">Copy</button>
+      </div>
+    </div>
+
+    <div id="policy" class="panel">
+      <div class="card">
+        <label>Policy type</label>
+        <select id="pol-type"><option>Refund & return policy</option><option>Shipping policy</option><option>Privacy policy</option><option>Terms of service</option></select>
+        <label>Store name</label><input id="pol-store" placeholder="e.g. Elvara">
+        <label>Shipping time</label><input id="pol-ship" placeholder="e.g. 7-14 business days">
+        <button class="btn" data-action="policy">Generate policy</button>
+        <div class="result" id="r-policy"></div>
+        <button class="btn-copy" data-copy="r-policy" style="display:none">Copy</button>
+      </div>
+    </div>
+
+    <div id="pricing" class="panel">
+      <div class="card">
+        <label>Product name</label><input id="pr-name" placeholder="e.g. Bluetooth Speaker">
+        <label>Your cost price (USD)</label><input id="pr-cost" type="number" placeholder="e.g. 12">
+        <button class="btn" data-action="pricing">Suggest pricing</button>
+        <div class="result" id="r-pricing"></div>
+        <button class="btn-copy" data-copy="r-pricing" style="display:none">Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('connectBtn').addEventListener('click', function() {
+  var url = document.getElementById('url').value.trim();
+  if (!url) { document.getElementById('status').textContent = 'Please enter your store URL.'; return; }
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+});
+
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('on'); });
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('on'); });
+    tab.classList.add('on');
+    document.getElementById(tab.dataset.tab).classList.add('on');
+  });
+});
+
+document.querySelectorAll('.btn-copy').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    navigator.clipboard.writeText(document.getElementById(btn.dataset.copy).textContent);
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+  });
+});
+
+document.querySelectorAll('[data-action]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var action = btn.dataset.action;
+    var prompts = {
+      product: 'Write a Shopify product description for: ' + v('p-name') + '. Features: ' + v('p-feat') + '. Tone: ' + v('p-tone') + '. Language: ' + v('p-lang') + '. Write a headline, 2-3 paragraphs and CTA. No markdown.',
+      seo: 'Generate SEO for Shopify product: ' + v('seo-name') + '. Provide: 1. SEO Title max 60 chars 2. Meta description max 155 chars 3. 10 tags. No markdown.',
+      ads: 'Write 3 ad copy variations for: ' + v('ad-name') + ' on ' + v('ad-platform') + '. Offer: ' + v('ad-offer') + '. Each with headline, body, CTA. No markdown.',
+      homepage: 'Write homepage copy for electronics store: ' + v('hp-name') + '. USP: ' + v('hp-usp') + '. Promo: ' + v('hp-promo') + '. Include hero headline, subheadline, CTA, 3 value props, about us. No markdown.',
+      email: 'Write a ' + v('em-type') + ' email for electronics store: ' + v('em-store') + '. Offer: ' + v('em-offer') + '. Include subject line, preview text, body, CTA. No markdown.',
+      policy: 'Write a ' + v('pol-type') + ' for Shopify store: ' + v('pol-store') + '. Shipping: ' + v('pol-ship') + '. Professional, ready to paste. No markdown.',
+      pricing: 'Suggest retail pricing for: ' + v('pr-name') + '. Cost: $' + v('pr-cost') + '. Provide retail price, sale price, profit margin, justification, competitor range. No markdown.'
+    };
+    run('r-' + action, prompts[action]);
+  });
+});
+
+function v(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+async function run(resultId, prompt) {
+  var el = document.getElementById(resultId);
+  el.innerHTML = '<span class="spinner"></span> Generating...';
+  el.classList.add('on');
+  try {
+    var r = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt })
+    });
+    var d = await r.json();
+    el.textContent = d.result || d.error || 'No response.';
+    var copyBtn = document.querySelector('[data-copy="' + resultId + '"]');
+    if (copyBtn) copyBtn.style.display = 'inline-block';
+  } catch(e) {
+    el.textContent = 'Error: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
